@@ -132,9 +132,8 @@ jobSchema.set('toJSON', { virtuals: true });
 jobSchema.set('toObject', { virtuals: true });
 
 // ─── Pre-find hook: auto-expire jobs past deadline ────────────────────────────
-jobSchema.pre(/^find/, function (next) {
-  this.where({ deadline: { $gte: new Date() } }).where({ isActive: true });
-  next();
+jobSchema.pre(/^find/, function () {
+  this.find({ isActive: true });
 });
 
 const Job = mongoose.model('Job', jobSchema);

@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, 'Email is required'],
-      unique: true,
+      unique: true, // ✅ keep this
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters'],
-      select: false, // Never returned in queries by default
+      select: false,
     },
 
     role: {
@@ -33,7 +33,6 @@ const userSchema = new mongoose.Schema(
       default: 'candidate',
     },
 
-    // ── Candidate-specific fields ────────────────────────────────────────────
     bio: {
       type: String,
       maxlength: [500, 'Bio cannot exceed 500 characters'],
@@ -69,7 +68,6 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
-    // ── Employer-specific fields ─────────────────────────────────────────────
     company: {
       name: { type: String, trim: true },
       website: { type: String, trim: true },
@@ -96,24 +94,26 @@ const userSchema = new mongoose.Schema(
     passwordResetExpires: Date,
   },
   {
-    timestamps: true, // adds createdAt and updatedAt automatically
+    timestamps: true,
   }
 );
 
-// ─── Indexes ──────────────────────────────────────────────────────────────────
-userSchema.index({ email: 1 });
+// ✅ KEEP ONLY THIS INDEX
 userSchema.index({ role: 1 });
 
-// ─── Pre-save Hook: Hash password before saving ───────────────────────────────
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+// ❌ REMOVED duplicate email index
+
+// ✅ FIXED PRE-SAVE HOOK (IMPORTANT)
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
-  this.passwordChangedAt = Date.now() - 1000; // ensure JWT issued after change
-  next();
+
+  this.passwordChangedAt = Date.now() - 1000;
 });
 
-// ─── Instance Methods ─────────────────────────────────────────────────────────
+// ─── Methods ─────────────────────────────────────
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };

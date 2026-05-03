@@ -1,33 +1,41 @@
 import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import cloudinary from '../config/cloudinary.js';
+import path from 'path';
+import fs from 'fs';
 import ApiError from '../utils/ApiError.js';
 
-// ─── Cloudinary storage for resumes (PDF only) ────────────────────────────────
-const resumeStorage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => ({
-    folder: `job-portal/resumes/${req.user._id}`,
-    resource_type: 'raw',           // 'raw' is required for non-image files like PDF
-    allowed_formats: ['pdf'],
-    public_id: `resume_${Date.now()}`,
-    use_filename: false,
-  }),
+// Create uploads folder if it doesn't exist
+const uploadDir = 'uploads/resumes';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const logoDir = 'uploads/logos';
+if (!fs.existsSync(logoDir)) {
+  fs.mkdirSync(logoDir, { recursive: true });
+}
+
+// ── Disk storage for resumes ──────────────────────────────────────────────────
+const resumeStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, 'uploads/resumes');
+  },
+  filename: (_req, file, cb) => {
+    const uniqueName = `resume_${Date.now()}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  },
 });
 
-// ─── Cloudinary storage for company logos / profile pictures (images) ─────────
-const imageStorage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, _file) => ({
-    folder: `job-portal/images/${req.user._id}`,
-    resource_type: 'image',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 400, height: 400, crop: 'limit' }],
-    public_id: `img_${Date.now()}`,
-  }),
+// ── Disk storage for logos ────────────────────────────────────────────────────
+const logoStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, 'uploads/logos');
+  },
+  filename: (_req, file, cb) => {
+    const uniqueName = `logo_${Date.now()}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  },
 });
 
-// ─── File filter helpers ──────────────────────────────────────────────────────
 const pdfFilter = (_req, file, cb) => {
   if (file.mimetype === 'application/pdf') {
     cb(null, true);
@@ -44,23 +52,19 @@ const imageFilter = (_req, file, cb) => {
   }
 };
 
-// ─── Exported middleware ───────────────────────────────────────────────────────
 export const uploadResume = multer({
   storage: resumeStorage,
   fileFilter: pdfFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 }).single('resume');
 
 export const uploadLogo = multer({
-  storage: imageStorage,
+  storage: logoStorage,
   fileFilter: imageFilter,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB max
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
 }).single('logo');
 
-/**
- * Wrap multer middleware to forward errors to Express's error handler.
- * Without this, multer errors bypass the global error handler.
- */
+// Wrap multer errors → Express error handler
 export const handleMulterError = (uploadFn) => (req, res, next) => {
   uploadFn(req, res, (err) => {
     if (err instanceof multer.MulterError) {

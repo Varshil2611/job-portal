@@ -33,11 +33,12 @@ export const getAllJobs = asyncHandler(async (req, res) => {
   if (jobType) filter.jobType = jobType;
   if (category) filter.category = category;
   if (experienceLevel) filter.experienceLevel = experienceLevel;
-
+  
   if (salaryMin || salaryMax) {
-    filter['salary.min'] = {};
-    if (salaryMin) filter['salary.min'].$gte = Number(salaryMin);
-    if (salaryMax) filter['salary.max'] = { $lte: Number(salaryMax) };
+  filter.salary = {};
+
+  if (salaryMin) filter.salary.$gte = Number(salaryMin);
+  if (salaryMax) filter.salary.$lte = Number(salaryMax);
   }
 
   const pageNum = Math.max(1, Number(page));
