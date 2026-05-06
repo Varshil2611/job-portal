@@ -1,0 +1,92 @@
+<div class="bg-gray-50 min-h-screen py-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-gray-900">
+        Welcome, {{ authStore.user()?.company?.name || authStore.user()?.name }} 👋
+      </h1>
+      <p class="text-gray-500 text-sm mt-1">Manage your job postings and applicants</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <div class="text-3xl font-bold text-blue-600">{{ totalJobs }}</div>
+        <div class="text-gray-500 text-sm mt-1">Jobs Posted</div>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <div class="text-3xl font-bold text-green-600">{{ activeJobs }}</div>
+        <div class="text-gray-500 text-sm mt-1">Active Jobs</div>
+      </div>
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <div class="text-3xl font-bold text-purple-600">{{ totalApplicants }}</div>
+        <div class="text-gray-500 text-sm mt-1">Total Applicants</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <a routerLink="/employer/post-job"
+        class="bg-green-600 text-white rounded-xl p-5 hover:bg-green-700 transition-colors">
+        <div class="text-2xl mb-2">➕</div>
+        <div class="font-medium">Post a Job</div>
+        <div class="text-green-100 text-xs mt-1">Create new listing</div>
+      </a>
+      <a routerLink="/employer/jobs"
+        class="bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-sm transition-all">
+        <div class="text-2xl mb-2">📋</div>
+        <div class="font-medium text-gray-900">My Jobs</div>
+        <div class="text-gray-400 text-xs mt-1">Manage listings</div>
+      </a>
+      <a routerLink="/employer/company-profile"
+        class="bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-sm transition-all">
+        <div class="text-2xl mb-2">🏢</div>
+        <div class="font-medium text-gray-900">Company Profile</div>
+        <div class="text-gray-400 text-xs mt-1">Update company info</div>
+      </a>
+    </div>
+
+    <!-- Recent Jobs -->
+    <div class="bg-white rounded-xl border border-gray-200">
+      <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+        <h2 class="font-semibold text-gray-900">Your Job Listings</h2>
+        <a routerLink="/employer/jobs" class="text-blue-600 text-sm hover:underline">View all</a>
+      </div>
+
+      @if (loading) {
+        <div class="p-5 space-y-3">
+          @for (i of [1,2,3]; track i) {
+            <div class="h-14 bg-gray-100 rounded-lg animate-pulse"></div>
+          }
+        </div>
+      } @else if (jobs.length === 0) {
+        <div class="p-12 text-center">
+          <div class="text-4xl mb-3">📭</div>
+          <p class="text-gray-500 text-sm">No jobs posted yet</p>
+          <a routerLink="/employer/post-job"
+            class="text-blue-600 text-sm hover:underline mt-2 inline-block">Post your first job →</a>
+        </div>
+      } @else {
+        <div class="divide-y divide-gray-100">
+          @for (job of jobs.slice(0, 5); track job._id) {
+            <div class="p-4 flex items-center justify-between">
+              <div>
+                <div class="font-medium text-gray-900 text-sm">{{ job.title }}</div>
+                <div class="text-gray-500 text-xs mt-0.5">
+                  {{ job.location }} · {{ job.jobType }} · Deadline: {{ job.deadline | date:'mediumDate' }}
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs text-gray-500">{{ job.applicationCount }} applicants</span>
+                <a [routerLink]="['/employer/applicants', job._id]"
+                  class="text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors">
+                  View
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

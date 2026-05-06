@@ -15,13 +15,24 @@ import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 const app = express();
 
-// ─── Path helpers (needed for ES modules — no __dirname by default) ───────────
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// ─── CORS — must be FIRST before everything else ──────────────────────────────
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // ─── Security ────────────────────────────────────────────────────────────────
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' }, // allow serving uploaded files
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
 // ─── Rate Limiting ───────────────────────────────────────────────────────────
@@ -36,31 +47,18 @@ app.use('/api/', limiter);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 20,
   message: { success: false, message: 'Too many auth attempts. Please try again in 15 minutes.' },
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
-
-// ─── CORS ────────────────────────────────────────────────────────────────────
-const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['http://localhost:4200'];
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-  })
-);
 
 // ─── Body Parsers ─────────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// ─── Static Files — serve uploaded resumes & logos locally ───────────────────
-// Access via: http://localhost:5000/uploads/resumes/filename.pdf
+// ─── Static Files ─────────────────────────────────────────────────────────────
 app.use('/uploads', express.static(join(__dirname, '../uploads')));
 
 // ─── Logger ──────────────────────────────────────────────────────────────────

@@ -1,0 +1,77 @@
+<div class="bg-gray-50 min-h-screen py-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+      <p class="text-gray-500 text-sm mt-1">Platform overview and management</p>
+    </div>
+
+    @if (loading) {
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        @for (i of [1,2,3]; track i) {
+          <div class="bg-white rounded-xl h-28 animate-pulse border border-gray-200"></div>
+        }
+      </div>
+    } @else if (stats) {
+
+      <!-- Stats -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="text-3xl font-bold text-blue-600">{{ stats.totalUsers }}</div>
+          <div class="text-gray-500 text-sm mt-1">Total Users</div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="text-3xl font-bold text-green-600">{{ stats.totalJobs }}</div>
+          <div class="text-gray-500 text-sm mt-1">Total Jobs</div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="text-3xl font-bold text-purple-600">{{ stats.totalApplications }}</div>
+          <div class="text-gray-500 text-sm mt-1">Total Applications</div>
+        </div>
+      </div>
+
+      <!-- Role Breakdown + Quick Actions -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 class="font-semibold text-gray-900 mb-4">User Breakdown</h2>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Candidates</span>
+              <span class="font-semibold text-gray-900">{{ getRoleCount('candidate') }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Employers</span>
+              <span class="font-semibold text-gray-900">{{ getRoleCount('employer') }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Admins</span>
+              <span class="font-semibold text-gray-900">{{ getRoleCount('admin') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <h2 class="font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div class="space-y-3">
+            <a routerLink="/admin/users"
+              class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <span class="text-xl">👥</span>
+              <div>
+                <div class="text-sm font-medium text-gray-900">Manage Users</div>
+                <div class="text-xs text-gray-400">Activate or deactivate accounts</div>
+              </div>
+            </a>
+            <a routerLink="/admin/jobs"
+              class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+              <span class="text-xl">💼</span>
+              <div>
+                <div class="text-sm font-medium text-gray-900">Manage Jobs</div>
+                <div class="text-xs text-gray-400">View and delete job listings</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

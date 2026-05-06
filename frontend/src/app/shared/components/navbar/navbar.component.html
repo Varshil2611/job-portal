@@ -1,0 +1,103 @@
+<nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+
+      <!-- Logo -->
+      <a routerLink="/" class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-sm">JP</span>
+        </div>
+        <span class="font-bold text-xl text-gray-900">JobPortal</span>
+      </a>
+
+      <!-- Desktop Nav -->
+      <div class="hidden md:flex items-center gap-6">
+
+        <a routerLink="/jobs" routerLinkActive="text-blue-600 font-medium"
+           class="text-gray-600 hover:text-blue-600 transition-colors text-sm">
+          Browse Jobs
+        </a>
+
+        <!-- Candidate links -->
+        @if (authStore.isCandidate()) {
+          <a routerLink="/candidate/applications" routerLinkActive="text-blue-600 font-medium"
+             class="text-gray-600 hover:text-blue-600 transition-colors text-sm">
+            My Applications
+          </a>
+        }
+
+        <!-- Employer links -->
+        @if (authStore.isEmployer()) {
+          <a routerLink="/employer/jobs" routerLinkActive="text-blue-600 font-medium"
+             class="text-gray-600 hover:text-blue-600 transition-colors text-sm">
+            My Jobs
+          </a>
+          <a routerLink="/employer/post-job"
+             class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors">
+            + Post a Job
+          </a>
+        }
+
+        <!-- Admin links -->
+        @if (authStore.isAdmin()) {
+          <a routerLink="/admin/users" routerLinkActive="text-blue-600 font-medium"
+             class="text-gray-600 hover:text-blue-600 transition-colors text-sm">Users</a>
+          <a routerLink="/admin/jobs" routerLinkActive="text-blue-600 font-medium"
+             class="text-gray-600 hover:text-blue-600 transition-colors text-sm">Jobs</a>
+          <a routerLink="/admin/dashboard" routerLinkActive="text-blue-600 font-medium"
+             class="text-gray-600 hover:text-blue-600 transition-colors text-sm">Stats</a>
+        }
+      </div>
+
+      <!-- Right side -->
+      <div class="hidden md:flex items-center gap-3">
+        @if (!authStore.isLoggedIn()) {
+          <a routerLink="/login"
+             class="text-gray-600 hover:text-blue-600 text-sm transition-colors">Login</a>
+          <a routerLink="/register"
+             class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+            Register
+          </a>
+        } @else {
+          <!-- User menu -->
+          <div class="flex items-center gap-3">
+            <a [routerLink]="authStore.isCandidate() ? '/candidate/profile' : authStore.isEmployer() ? '/employer/company-profile' : '/admin/dashboard'"
+               class="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 transition-colors">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <span class="text-blue-700 font-medium text-xs">
+                  {{ authStore.user()?.name?.charAt(0)?.toUpperCase() }}
+                </span>
+              </div>
+              <span class="font-medium">{{ authStore.user()?.name }}</span>
+            </a>
+            <button (click)="logout()"
+              class="text-sm text-gray-500 hover:text-red-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:border-red-300 transition-colors">
+              Logout
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Mobile menu button -->
+      <button (click)="menuOpen = !menuOpen" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            [attr.d]="menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    @if (menuOpen) {
+      <div class="md:hidden border-t border-gray-100 py-3 space-y-1">
+        <a routerLink="/jobs" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Browse Jobs</a>
+        @if (!authStore.isLoggedIn()) {
+          <a routerLink="/login" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">Login</a>
+          <a routerLink="/register" class="block px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 rounded-lg">Register</a>
+        } @else {
+          <button (click)="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg">Logout</button>
+        }
+      </div>
+    }
+  </div>
+</nav>

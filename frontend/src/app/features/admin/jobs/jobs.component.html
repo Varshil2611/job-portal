@@ -1,0 +1,63 @@
+<div class="bg-gray-50 min-h-screen py-8">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">All Jobs</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ jobs.length }} jobs on platform</p>
+    </div>
+
+    @if (successMsg) {
+      <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+        {{ successMsg }}
+      </div>
+    }
+
+    @if (loading) {
+      <div class="space-y-3">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="bg-white rounded-xl h-20 animate-pulse border border-gray-200"></div>
+        }
+      </div>
+    } @else if (jobs.length === 0) {
+      <div class="bg-white rounded-xl border border-gray-200 p-16 text-center">
+        <p class="text-gray-500">No jobs found</p>
+      </div>
+    } @else {
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="divide-y divide-gray-100">
+          @for (job of jobs; track job._id) {
+            <div class="p-4 flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-gray-900 text-sm">{{ job.title }}</span>
+                  <span class="text-xs px-2 py-0.5 rounded-full"
+                    [class]="job.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                    {{ job.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+                <div class="text-gray-500 text-xs mt-0.5">
+                  {{ job.company?.name }} · {{ job.location }} · {{ job.category }}
+                </div>
+                <div class="text-gray-400 text-xs mt-0.5">
+                  {{ job.applicationCount }} applicants · Posted {{ job.createdAt | date:'mediumDate' }}
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <a [routerLink]="['/jobs', job._id]"
+                  class="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg
+                    hover:bg-blue-50 transition-colors">
+                  View
+                </a>
+                <button (click)="deleteJob(job._id)"
+                  [disabled]="deleting === job._id"
+                  class="text-xs text-red-500 border border-red-200 px-3 py-1.5 rounded-lg
+                    hover:bg-red-50 transition-colors disabled:opacity-50">
+                  Delete
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
